@@ -1,609 +1,609 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fun Friday Group Chat</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-        .phone-container {
-            width: 375px;
-            height: 667px;
-            background: #000;
-            border-radius: 25px;
-            padding: 5px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
+      .phone-container {
+        width: 375px;
+        height: 667px;
+        background: #000;
+        border-radius: 25px;
+        padding: 5px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
 
-        .phone-screen {
-            width: 100%;
-            height: 100%;
-            background: #f5f5f5;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-        }
+      .phone-screen {
+        width: 100%;
+        height: 100%;
+        background: #f5f5f5;
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
 
-        .status-bar {
-            height: 44px;
-            background: #f5f5f5;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            font-size: 17px;
-            font-weight: 600;
-        }
+      .status-bar {
+        height: 44px;
+        background: #f5f5f5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        font-size: 17px;
+        font-weight: 600;
+      }
 
-        .signal-wifi-battery {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+      .signal-wifi-battery {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
 
-        .signal, .wifi, .battery {
-            width: 20px;
-            height: 12px;
-            background: #000;
-            border-radius: 2px;
-        }
+      .signal,
+      .wifi,
+      .battery {
+        width: 20px;
+        height: 12px;
+        background: #000;
+        border-radius: 2px;
+      }
 
-        .chat-header {
-            height: 60px;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            position: relative;
-        }
+      .chat-header {
+        height: 60px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
 
-        .back-btn {
-            width: 24px;
-            height: 24px;
-            margin-right: 15px;
-            cursor: pointer;
-        }
+      .back-btn {
+        width: 24px;
+        height: 24px;
+        margin-right: 15px;
+        cursor: pointer;
+      }
 
-        .group-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 20px;
-            background: linear-gradient(45deg, #1e3c72, #2a5298);
-            margin-right: 12px;
-            position: relative;
-            overflow: hidden;
-        }
+      .group-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+        background: linear-gradient(45deg, #1e3c72, #2a5298);
+        margin-right: 12px;
+        position: relative;
+        overflow: hidden;
+      }
 
-        .group-avatar::after {
-            content: '🎉';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-        }
+      .group-avatar::after {
+        content: "🎉";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20px;
+      }
 
-        .group-info h2 {
-            font-size: 17px;
-            font-weight: 600;
-            color: #c41e3a;
-        }
+      .group-info h2 {
+        font-size: 17px;
+        font-weight: 600;
+        color: #c41e3a;
+      }
 
-        .incognito-btn {
-            position: absolute;
-            right: 15px;
-            width: 40px;
-            height: 40px;
-            background: #c41e3a;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            font-size: 18px;
-        }
+      .incognito-btn {
+        position: absolute;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+        background: #c41e3a;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        font-size: 18px;
+      }
 
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px 15px;
-            background: #f5f5f5;
-        }
+      .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px 15px;
+        background: #f5f5f5;
+      }
 
-        .message {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: flex-start;
-        }
+      .message {
+        margin-bottom: 15px;
+        display: flex;
+        align-items: flex-start;
+      }
 
-        .message.sent {
-            justify-content: flex-end;
-        }
+      .message.sent {
+        justify-content: flex-end;
+      }
 
-        .message-content {
-            max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            position: relative;
-        }
+      .message-content {
+        max-width: 75%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        position: relative;
+      }
 
-        .message.received .message-content {
-            background: #fff;
-            margin-left: 40px;
-        }
+      .message.received .message-content {
+        background: #fff;
+        margin-left: 40px;
+      }
 
-        .message.sent .message-content {
-            background: #c41e3a;
-            color: white;
-        }
+      .message.sent .message-content {
+        background: #c41e3a;
+        color: white;
+      }
 
-        .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 16px;
-            background: #ddd;
-            margin-right: 8px;
-            flex-shrink: 0;
-        }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 16px;
+        background: #ddd;
+        margin-right: 8px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
 
-        .message.sent .avatar {
-            display: none;
-        }
+      .message.sent .avatar {
+        display: none;
+      }
 
-        .sender-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #666;
-            margin-bottom: 2px;
-        }
+      .sender-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 2px;
+      }
 
-        .message-text {
-            font-size: 16px;
-            line-height: 1.4;
-        }
+      .message-text {
+        font-size: 16px;
+        line-height: 1.4;
+        word-wrap: break-word;
+      }
 
-        .message-time {
-            font-size: 12px;
-            color: #666;
-            margin-top: 4px;
-            text-align: right;
-        }
+      .message-time {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+        text-align: right;
+      }
 
-        .message.sent .message-time {
-            color: rgba(255,255,255,0.8);
-        }
+      .message.sent .message-time {
+        color: rgba(255, 255, 255, 0.8);
+      }
 
-        .online-indicator {
-            width: 8px;
-            height: 8px;
-            background: #4CAF50;
-            border-radius: 50%;
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            border: 2px solid white;
-        }
+      .online-indicator {
+        width: 8px;
+        height: 8px;
+        background: #4caf50;
+        border-radius: 50%;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        border: 2px solid white;
+      }
 
-        .input-container {
-            height: 80px;
-            background: #fff;
-            padding: 10px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
-        }
+      .input-container {
+        height: 80px;
+        background: #fff;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+      }
 
-        .message-input {
-            flex: 1;
-            height: 40px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            padding: 0 20px;
-            font-size: 16px;
-            outline: none;
-        }
+      .message-input {
+        flex: 1;
+        height: 40px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        padding: 0 20px;
+        font-size: 16px;
+        outline: none;
+      }
 
-        .attachment-btn, .send-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
+      .attachment-btn,
+      .send-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 20px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
 
-        .attachment-btn {
-            background: #f0f0f0;
-            color: #666;
-        }
+      .attachment-btn {
+        background: #f0f0f0;
+        color: #666;
+      }
 
-        .send-btn {
-            background: #c41e3a;
-            color: white;
-        }
+      .send-btn {
+        background: #c41e3a;
+        color: white;
+      }
 
-        .anonymous-notice {
-            background: rgba(0,0,0,0.1);
-            padding: 8px 20px;
-            text-align: center;
-            font-size: 13px;
-            color: #666;
-            border-top: 1px solid #e0e0e0;
-        }
+      .anonymous-notice {
+        background: rgba(0, 0, 0, 0.1);
+        padding: 8px 20px;
+        text-align: center;
+        font-size: 13px;
+        color: #666;
+        border-top: 1px solid #e0e0e0;
+      }
 
-        .surprise-message {
-            background: #e8f5e8;
-            border-left: 3px solid #4CAF50;
-        }
+      .online-users {
+        background: #fff;
+        padding: 8px 15px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+        color: #333;
+      }
 
-        .emoji-wave::after {
-            content: '👋';
-            margin-left: 5px;
-        }
+      .system-message {
+        text-align: center;
+        color: #666;
+        font-size: 14px;
+        margin: 10px 0;
+        font-style: italic;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="phone-container">
-        <div class="phone-screen">
-            <!-- Status Bar -->
-            <div class="status-bar">
-                <span>9:41</span>
-                <div class="signal-wifi-battery">
-                    <div class="signal"></div>
-                    <div class="wifi"></div>
-                    <div class="battery"></div>
-                </div>
-            </div>
-
-            <!-- Chat Header -->
-            <div class="chat-header">
-                <svg class="back-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-                
-                <div class="group-avatar"></div>
-                
-                <div class="group-info">
-                    <h2>Fun Friday Group</h2>
-                </div>
-                
-                <div class="incognito-btn" onclick="toggleAnonymous()">
-                    👁️‍🗨️
-                </div>
-            </div>
-
-            <!-- Chat Messages -->
-            <div class="chat-messages" id="messages">
-                <!-- Messages will be populated by JavaScript -->
-            </div>
-
-            <!-- Anonymous Notice -->
-            <div class="anonymous-notice" id="anonymousNotice" style="display: none;">
-                👁️‍🗨️ Now you're appearing as Anonymous!
-            </div>
-
-            <!-- Input Container -->
-            <div class="input-container">
-                <button class="attachment-btn">
-                    📷
-                </button>
-                <input type="text" class="message-input" id="messageInput" placeholder="Type a message ..." onkeypress="handleKeyPress(event)">
-                <button class="send-btn" onclick="sendMessage()">
-                    ▶️
-                </button>
-            </div>
+      <div class="phone-screen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span>9:41</span>
+          <div class="signal-wifi-battery">
+            <div class="signal"></div>
+            <div class="wifi"></div>
+            <div class="battery"></div>
+          </div>
         </div>
+
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <svg
+            class="back-btn"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+
+          <div class="group-avatar"></div>
+
+          <div class="group-info">
+            <h2>Fun Friday Group</h2>
+          </div>
+
+          <div class="incognito-btn" onclick="toggleAnonymous()">👁️‍🗨️</div>
+        </div>
+
+        <!-- Online Users -->
+        <div class="online-users">
+          👥 Online: <span id="onlineList">Connecting...</span>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="messages">
+          <!-- Messages will be populated by JavaScript -->
+        </div>
+
+        <!-- Anonymous Notice -->
+        <div
+          class="anonymous-notice"
+          id="anonymousNotice"
+          style="display: none"
+        >
+          👁️‍🗨️ Now you're appearing as Anonymous!
+        </div>
+
+        <!-- Input Container -->
+        <div class="input-container">
+          <button class="attachment-btn">📷</button>
+          <input
+            type="text"
+            class="message-input"
+            id="messageInput"
+            placeholder="Type a message ..."
+            onkeypress="handleKeyPress(event)"
+          />
+          <button class="send-btn" onclick="sendMessage()">▶️</button>
+        </div>
+      </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        let isAnonymous = false;
-        let currentUser = prompt('Enter your username:') || 'Anonymous_' + Math.floor(Math.random() * 1000);
-        let socket = io();
-        let currentGroupId = 'fun_friday_group';
-        // Socket connection and event handlers
-        socket.on('connect', () => {
-            console.log('Connected to server');
-            // Join the group
-            socket.emit('joinGroup', {
-                groupId: currentGroupId,
-                username: currentUser
-            });
-            
-            // Load existing messages
-            loadMessages();
-        });
+      let isAnonymous = false;
+      let currentUser = prompt("Enter your username:") || "Anonymous_" + Math.floor(Math.random() * 1000);
+      let socket = io();
+      let currentGroupId = "fun_friday_group";
 
-        socket.on('newMessage', (message) => {
+      console.log("🚀 Initializing chat as:", currentUser);
+
+      socket.on("connect", () => {
+        console.log("✅ Connected to server");
+        socket.emit("joinGroup", {
+          groupId: currentGroupId,
+          username: currentUser,
+        });
+        loadMessages();
+      });
+
+      socket.on("newMessage", (message) => {
+        console.log("📨 Received message:", message);
+        displayMessage({
+          sender: message.sender || "Anonymous",
+          text: message.text || "",
+          timestamp: new Date(message.timestamp),
+          isReceived: (message.sender || "Anonymous") !== currentUser,
+          isAnonymous: message.is_anonymous,
+        });
+      });
+
+      socket.on("userJoined", (data) => {
+        showSystemMessage(`${data.username} joined the chat`);
+      });
+
+      socket.on("userLeft", (data) => {
+        showSystemMessage(`${data.username} left the chat`);
+      });
+
+      socket.on("userTyping", (data) => {
+        if (data.username !== currentUser) {
+          showTypingIndicator(data.username, data.isTyping);
+        }
+      });
+
+      socket.on("onlineUsers", (users) => {
+        console.log("👥 Online users updated:", users);
+        updateOnlineUsersList(users);
+      });
+
+      socket.on("error", (error) => {
+        console.error("❌ Socket error:", error);
+        alert("Error: " + error.message);
+      });
+
+      socket.on("disconnect", () => {
+        console.warn("⚠️ Disconnected from server");
+        document.getElementById("onlineList").textContent = "Disconnected";
+      });
+
+      function updateOnlineUsersList(users) {
+        const onlineList = document.getElementById("onlineList");
+        if (!users || users.length === 0) {
+          onlineList.textContent = "No one online";
+          return;
+        }
+        onlineList.innerHTML = users
+          .map((u) => {
+            const isCurrent = u === currentUser;
+            return `<span style="margin-right:8px; ${
+              isCurrent ? "font-weight:bold;color:#c41e3a;" : ""
+            }">${u}</span>`;
+          })
+          .join("");
+      }
+
+      async function loadMessages() {
+        try {
+          const response = await fetch(`/api/messages/${currentGroupId}`);
+          const messages = await response.json();
+          console.log("📜 Loaded messages:", messages);
+
+          const messagesContainer = document.getElementById("messages");
+          messagesContainer.innerHTML = "";
+
+          messages.forEach((msg) => {
             displayMessage({
-                sender: message.sender,
-                text: message.text,
-                timestamp: new Date(message.timestamp),
-                isReceived: message.sender !== currentUser
+              sender: msg.sender || "Anonymous",
+              text: msg.text || "",
+              timestamp: new Date(msg.timestamp),
+              isReceived: (msg.sender || "Anonymous") !== currentUser,
+              isAnonymous: msg.is_anonymous,
             });
-        });
+          });
+        } catch (error) {
+          console.error("❌ Error loading messages:", error);
+        }
+      }
 
-        socket.on('userJoined', (data) => {
-            showSystemMessage(`${data.username} joined the chat`);
-        });
+      function displayMessage(message) {
+        const messagesContainer = document.getElementById("messages");
+        const messageEl = document.createElement("div");
+        messageEl.className = `message ${message.isReceived ? "received" : "sent"}`;
 
-        socket.on('userLeft', (data) => {
-            showSystemMessage(`${data.username} left the chat`);
-        });
-
-        socket.on('userTyping', (data) => {
-            if (data.username !== currentUser) {
-                showTypingIndicator(data.username, data.isTyping);
-            }
-        });
-
-        socket.on('onlineUsers', (users) => {
-            updateOnlineUsersList(users);
-        });
-
-        socket.on('error', (error) => {
-            console.error('Socket error:', error);
-            alert('Error: ' + error.message);
-        });
-
-        // Load messages from server
-        async function loadMessages() {
-            try {
-                const response = await fetch(`/api/messages/${currentGroupId}`);
-                const messages = await response.json();
-                
-                const messagesContainer = document.getElementById('messages');
-                messagesContainer.innerHTML = '';
-                
-                messages.forEach(message => {
-                    displayMessage({
-                        sender: message.sender,
-                        text: message.text,
-                        timestamp: new Date(message.timestamp),
-                        isReceived: message.sender !== currentUser,
-                        isAnonymous: message.is_anonymous
-                    });
-                });
-                
-            } catch (error) {
-                console.error('Error loading messages:', error);
-            }
+        let avatarHtml = "";
+        if (message.isReceived) {
+          avatarHtml = `<div class="avatar" style="background: ${getAvatarColor(message.sender)};">
+            ${getAvatarEmoji(message.sender)}
+            ${Math.random() > 0.7 ? '<div class="online-indicator"></div>' : ""}
+          </div>`;
         }
 
-        function displayMessage(message) {
-            const messagesContainer = document.getElementById('messages');
-            const messageEl = document.createElement('div');
-            messageEl.className = `message ${message.isReceived ? 'received' : 'sent'}`;
-            
-            let avatarHtml = '';
-            if (message.isReceived) {
-                avatarHtml = `<div class="avatar" style="background: ${getAvatarColor(message.sender)};">
-                    ${getAvatarEmoji(message.sender)}
-                    ${Math.random() > 0.7 ? '<div class="online-indicator"></div>' : ''}
-                </div>`;
-            }
+        const timeString = formatTime(message.timestamp);
 
-            const timeString = formatTime(message.timestamp);
-            
-            messageEl.innerHTML = `
-                ${avatarHtml}
-                <div class="message-content">
-                    ${message.isReceived ? `<div class="sender-name">${message.sender}</div>` : ''}
-                    <div class="message-text">${message.text}</div>
-                    <div class="message-time">${timeString} ${!message.isReceived ? '✓✓' : ''}</div>
-                </div>
-            `;
-            
-            messagesContainer.appendChild(messageEl);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
+        messageEl.innerHTML = `
+          ${avatarHtml}
+          <div class="message-content">
+            ${message.isReceived ? `<div class="sender-name">${message.sender}</div>` : ""}
+            <div class="message-text">${message.text}</div>
+            <div class="message-time">${timeString} ${!message.isReceived ? "✓✓" : ""}</div>
+          </div>
+        `;
 
-        function formatTime(date) {
-            const now = new Date();
-            const messageDate = new Date(date);
-            
-            let hours = messageDate.getHours();
-            const minutes = messageDate.getMinutes();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            const minutesStr = minutes < 10 ? '0' + minutes : minutes;
-            
-            return `${hours}:${minutesStr} ${ampm}`;
-        }
+        messagesContainer.appendChild(messageEl);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
 
-        function getAvatarEmoji(sender) {
-            const emojiMap = {
-                'Abhay Shukla': '👨‍💼',
-                'Anonymous': '🕶️',
-                'System': '🤖'
-            };
-            return emojiMap[sender] || '👤';
-        }
+      function formatTime(date) {
+        const d = new Date(date);
+        let hours = d.getHours();
+        const minutes = d.getMinutes();
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes < 10 ? "0" + minutes : minutes} ${ampm}`;
+      }
 
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            
-            if (text) {
-                // Send message via socket
-                socket.emit('sendMessage', {
-                    sender: currentUser,
-                    text: text,
-                    isAnonymous: isAnonymous,
-                    groupId: currentGroupId
-                });
-                
-                input.value = '';
-                
-                // Stop typing indicator
-                socket.emit('typing', {
-                    groupId: currentGroupId,
-                    username: currentUser,
-                    isTyping: false
-                });
-            }
-        }
+      function getAvatarEmoji(sender) {
+        if (!sender) sender = "Anonymous";
+        const emojiMap = {
+          Anonymous: "🕶️",
+          System: "🤖",
+        };
+        return emojiMap[sender] || "👤";
+      }
 
-        function showSystemMessage(text) {
-            const messagesContainer = document.getElementById('messages');
-            const messageEl = document.createElement('div');
-            messageEl.className = 'system-message';
-            messageEl.style.cssText = `
-                text-align: center;
-                color: #666;
-                font-size: 14px;
-                margin: 10px 0;
-                font-style: italic;
-            `;
-            messageEl.textContent = text;
-            messagesContainer.appendChild(messageEl);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
+      function getAvatarColor(sender) {
+        if (!sender) sender = "Anonymous";
+        const colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD"];
+        const hash = sender.split("").reduce((a, b) => {
+          a = (a << 5) - a + b.charCodeAt(0);
+          return a & a;
+        }, 0);
+        return colors[Math.abs(hash) % colors.length];
+      }
 
-        let typingTimeout;
-        function handleTyping() {
-            socket.emit('typing', {
-                groupId: currentGroupId,
-                username: currentUser,
-                isTyping: true
-            });
-            
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                socket.emit('typing', {
-                    groupId: currentGroupId,
-                    username: currentUser,
-                    isTyping: false
-                });
-            }, 2000);
-        }
-
-        function showTypingIndicator(username, isTyping) {
-            const messagesContainer = document.getElementById('messages');
-            let typingIndicator = document.getElementById('typing-indicator');
-            
-            if (isTyping && !typingIndicator) {
-                typingIndicator = document.createElement('div');
-                typingIndicator.id = 'typing-indicator';
-                typingIndicator.className = 'message received';
-                typingIndicator.innerHTML = `
-                    <div class="avatar" style="background: ${getAvatarColor(username)};">💬</div>
-                    <div class="message-content">
-                        <div class="sender-name">${username}</div>
-                        <div class="message-text">typing...</div>
-                    </div>
-                `;
-                messagesContainer.appendChild(typingIndicator);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            } else if (!isTyping && typingIndicator) {
-                typingIndicator.remove();
-            }
-        }
-
-        function updateOnlineUsersList(users) {
-            // This could be used to show online users in the UI
-            console.log('Online users:', users);
-        }
-
-        function getAvatarColor(sender) {
-            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
-            const hash = sender.split('').reduce((a, b) => {
-                a = ((a << 5) - a) + b.charCodeAt(0);
-                return a & a;
-            }, 0);
-            return colors[Math.abs(hash) % colors.length];
-        }
-
-        function getCurrentTime() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = now.getMinutes();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            const minutesStr = minutes < 10 ? '0' + minutes : minutes;
-            return `${hours}:${minutesStr} ${ampm}`;
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            
-            if (text) {
-                // Send message via socket
-                socket.emit('sendMessage', {
-                    sender: currentUser,
-                    text: text,
-                    isAnonymous: isAnonymous,
-                    groupId: currentGroupId
-                });
-                
-                input.value = '';
-                
-                // Stop typing indicator
-                socket.emit('typing', {
-                    groupId: currentGroupId,
-                    username: currentUser,
-                    isTyping: false
-                });
-            }
-        }
-
-        function toggleAnonymous() {
-            isAnonymous = !isAnonymous;
-            const notice = document.getElementById('anonymousNotice');
-            const incognitoBtn = document.querySelector('.incognito-btn');
-            
-            if (isAnonymous) {
-                notice.style.display = 'block';
-                incognitoBtn.style.background = '#4CAF50';
-                incognitoBtn.innerHTML = '🕶️';
-            } else {
-                notice.style.display = 'none';
-                incognitoBtn.style.background = '#c41e3a';
-                incognitoBtn.innerHTML = '👁️‍🗨️';
-            }
-        }
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            } else {
-                handleTyping();
-            }
-        }
-
-        // Add send button animation
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector('.send-btn').addEventListener('click', function() {
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = 'scale(1)';
-                }, 100);
-            });
-        });
+      function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const text = input.value.trim();
         
+        if (!text) {
+          console.warn("⚠️ Empty message, not sending");
+          return;
+        }
+
+        console.log("📤 Sending message:", { sender: currentUser, text, isAnonymous });
+
+        // FIXED: Send correct parameter names that backend expects
+        socket.emit("sendMessage", {
+          groupId: currentGroupId,
+          sender: currentUser,
+          text: text,
+          isAnonymous: isAnonymous,
+        });
+
+        input.value = "";
+
+        // Stop typing indicator
+        socket.emit("typing", {
+          groupId: currentGroupId,
+          username: currentUser,
+          isTyping: false,
+        });
+      }
+
+      function showSystemMessage(text) {
+        const messagesContainer = document.getElementById("messages");
+        const el = document.createElement("div");
+        el.className = "system-message";
+        el.textContent = text;
+        messagesContainer.appendChild(el);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      let typingTimeout;
+      function handleTyping() {
+        socket.emit("typing", {
+          groupId: currentGroupId,
+          username: currentUser,
+          isTyping: true,
+        });
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+          socket.emit("typing", {
+            groupId: currentGroupId,
+            username: currentUser,
+            isTyping: false,
+          });
+        }, 2000);
+      }
+
+      function showTypingIndicator(username, isTyping) {
+        const container = document.getElementById("messages");
+        let indicator = document.getElementById("typing-indicator");
+        if (isTyping && !indicator) {
+          indicator = document.createElement("div");
+          indicator.id = "typing-indicator";
+          indicator.className = "message received";
+          indicator.innerHTML = `<div class="avatar" style="background:${getAvatarColor(username)};">💬</div>
+            <div class="message-content"><div class="sender-name">${username}</div><div class="message-text">typing...</div></div>`;
+          container.appendChild(indicator);
+          container.scrollTop = container.scrollHeight;
+        } else if (!isTyping && indicator) {
+          indicator.remove();
+        }
+      }
+
+      function toggleAnonymous() {
+        isAnonymous = !isAnonymous;
+        const notice = document.getElementById("anonymousNotice");
+        const btn = document.querySelector(".incognito-btn");
+        if (isAnonymous) {
+          notice.style.display = "block";
+          btn.style.background = "#4CAF50";
+          btn.innerHTML = "🕶️";
+          console.log("🕶️ Anonymous mode ON");
+        } else {
+          notice.style.display = "none";
+          btn.style.background = "#c41e3a";
+          btn.innerHTML = "👁️‍🗨️";
+          console.log("👁️ Anonymous mode OFF");
+        }
+      }
+
+      function handleKeyPress(e) {
+        if (e.key === "Enter") {
+          sendMessage();
+        } else {
+          handleTyping();
+        }
+      }
+
+      // Add send button animation
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelector(".send-btn").addEventListener("click", function () {
+          this.style.transform = "scale(0.95)";
+          setTimeout(() => {
+            this.style.transform = "scale(1)";
+          }, 100);
+        });
+      });
     </script>
-</body>
+  </body>
 </html>
