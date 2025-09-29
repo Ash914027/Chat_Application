@@ -1,16 +1,18 @@
 require('dotenv').config();
-const mysql = require('mysql');
+const mysql = require('mysql2/promise');  // use mysql2 with promises
 
 async function setup() {
   const cfg = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || ''
+    password: process.env.DB_PASSWORD || '',
+    port: process.env.DB_PORT || 3306   // important for XAMPP
   };
 
   console.log('Using DB host:', cfg.host);
   console.log('Using DB user:', cfg.user);
   console.log('Using DB password: ' + (cfg.password ? '********' : '(empty)'));
+  console.log('Using DB port:', cfg.port);
 
   const connection = await mysql.createConnection(cfg);
 
@@ -41,15 +43,15 @@ async function setup() {
     ) ENGINE=InnoDB;
   `);
 
-  console.log('Database and tables created (or already exist).');
+  console.log('✅ Database and tables created (or already exist).');
   await connection.end();
 }
 
 setup().catch(err => {
-  console.error('\nError setting up database. Possible causes:');
-  console.error(' - MySQL server not running or refusing connections');
+  console.error('\n❌ Error setting up database. Possible causes:');
+  console.error(' - MySQL server not running (start it in XAMPP Control Panel)');
   console.error(' - Incorrect credentials in .env');
-  console.error(' - MySQL configured on a non-default port or host');
+  console.error(' - MySQL running on a different port');
   console.error('\nDetailed error:');
   console.error(err && err.message ? err.message : err);
   process.exit(1);

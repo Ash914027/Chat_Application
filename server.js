@@ -4,6 +4,8 @@ const http = require('http');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
 const { Server } = require('socket.io');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(cors());
@@ -12,49 +14,80 @@ app.use(express.static('public'));
 
 const PORT = process.env.PORT || 3000;
 
-// MySQL pool (attempt to connect; fall back to in-memory storage if unavailable)
 let pool = null;
-const inMemoryMessages = new Map(); // groupId -> [{...message}]
+const inMemoryMessages = new Map();
+
+async function getPhpMyAdminConfig() {
+  try {
+    const configPath = path.join('c:\\', 'xampp', 'phpMyAdmin', 'config.inc.php');
+    if (!fs.existsSync(configPath)) return null;
+
+    const phpConfig = fs.readFileSync(configPath, 'utf8');
+    function extract(pattern, fallback) {
+      const match = phpConfig.match(pattern);
+      return match ? match[1] : fallback;
+    }
+
+    return {
+      host: extract(/\$cfg\['Servers'\]\[\$i\]\['host'\]\s*=\s*'([^']+)'/, 'localhost'),
+      user: extract(/\$cfg\['Servers'\]\[\$i\]\['user'\]\s*=\s*'([^']+)'/, 'root'),
+      password: extract(/\$cfg\['Servers'\]\[\$i\]\['password'\]\s*=\s*'([^']*)'/, ''),
+      port: extract(/\$cfg\['Servers'\]\[\$i\]\['port'\]\s*=\s*'([^']+)'/, '3306'),
+      database: process.env.DB_NAME || 'chat_app'
+    };
+  } catch (err) {
+    console.warn('⚠ Could not read phpMyAdmin config:', err.message);
+    return null;
+  }
+}
 
 async function initDbPool() {
   try {
+    let cfg = await getPhpMyAdminConfig();
+    if (!cfg) {
+      cfg = {
+        host: process.env.DB_HOST || 'localhost',
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '',
+        port: process.env.DB_PORT || 3306,
+        database: process.env.DB_NAME || 'chat_app'
+      };
+    }
+
     pool = mysql.createPool({
-      host: process.env.DB_HOST || 'localhost',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'chat_app',
+      ...cfg,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0
     });
 
-    // quick ping to validate connection
     const conn = await pool.getConnection();
     await conn.ping();
     conn.release();
-    console.log('Connected to MySQL database. Messages will be persisted.');
+
+    console.log('✅ Connected to MySQL database. Messages will be persisted.');
   } catch (err) {
     pool = null;
-    console.warn('\nWarning: Unable to connect to MySQL. Running in-memory fallback.');
+    console.warn('\n⚠ Warning: Unable to connect to MySQL. Running in-memory fallback.');
     console.warn(' - Error message:', err && err.message ? err.message : err);
-    console.warn(' - To enable persistence start MySQL and set DB_* in .env, then restart the server.\n');
+    console.warn(' - To enable persistence start MySQL and configure phpMyAdmin or .env\n');
   }
 }
 
 initDbPool();
 
-// Basic APIs
+// ---------------------- APIs ----------------------
+// FIXED: Return correct field names that frontend expects
 app.get('/api/messages/:groupId', async (req, res) => {
   const { groupId } = req.params;
   try {
     if (pool) {
       const [rows] = await pool.execute(
-        'SELECT m.id, m.group_id, m.user_name, m.is_anon, m.message, m.created_at FROM messages m WHERE m.group_id = ? ORDER BY m.created_at ASC',
+        'SELECT id, group_id, user_name AS sender, is_anon AS is_anonymous, message AS text, created_at AS timestamp FROM messages WHERE group_id = ? ORDER BY created_at ASC',
         [groupId]
       );
       res.json(rows);
     } else {
-      // return in-memory messages
       res.json(inMemoryMessages.get(groupId) || []);
     }
   } catch (err) {
@@ -64,7 +97,6 @@ app.get('/api/messages/:groupId', async (req, res) => {
 });
 
 app.get('/api/users/online/:groupId', (req, res) => {
-  // placeholder - real-time via sockets
   res.json({ online: [] });
 });
 
@@ -85,6 +117,7 @@ app.post('/api/groups/:groupId/join', async (req, res) => {
   }
 });
 
+// ---------------------- Socket.IO ----------------------
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -93,91 +126,85 @@ const io = new Server(httpServer, {
   }
 });
 
-// In-memory user presence map: socketId -> { userName, groupId, isAnon }
 const presence = new Map();
 
 io.on('connection', (socket) => {
-  console.log('socket connected', socket.id);
+  console.log('✅ Socket connected:', socket.id);
 
-  socket.on('join', async ({ groupId = 'fun_friday', userName }) => {
+  // FIXED: Listen for 'joinGroup' instead of 'join'
+  socket.on('joinGroup', async ({ groupId, username }) => {
+    console.log(`👤 ${username} joining group: ${groupId}`);
     socket.join(groupId);
-    presence.set(socket.id, { userName, groupId, isAnon: false });
-    io.to(groupId).emit('presence', getPresenceForGroup(groupId));
-
-    // notify
-    socket.to(groupId).emit('system_message', { message: `${userName} joined the group.` });
+    presence.set(socket.id, { username, groupId, isAnon: false });
+    
+    // Emit online users list
+    io.to(groupId).emit('onlineUsers', getOnlineUsersForGroup(groupId));
+    
+    // Notify others about new user
+    socket.to(groupId).emit('userJoined', { username });
   });
 
-  socket.on('set_anon', ({ isAnon }) => {
-    const p = presence.get(socket.id);
-    if (p) {
-      p.isAnon = !!isAnon;
-      presence.set(socket.id, p);
-      io.to(p.groupId).emit('presence', getPresenceForGroup(p.groupId));
-    }
-  });
-
-  socket.on('typing', ({ groupId, userName }) => {
-    socket.to(groupId).emit('typing', { userName });
-  });
-
-  socket.on('stop_typing', ({ groupId, userName }) => {
-    socket.to(groupId).emit('stop_typing', { userName });
-  });
-
-  socket.on('message', async ({ groupId = 'fun_friday', userName, message, isAnon = false }) => {
+  // FIXED: Listen for 'sendMessage' instead of 'message'
+  socket.on('sendMessage', async ({ groupId, sender, text, isAnonymous }) => {
+    console.log(`💬 Message from ${sender} in ${groupId}:`, text);
+    
     try {
-      const displayName = isAnon ? 'Anonymous' : userName;
+      const displayName = isAnonymous ? 'Anonymous' : sender;
       let msg = {
-        id: null,
-        group_id: groupId,
-        user_name: displayName,
-        is_anon: isAnon ? 1 : 0,
-        message,
-        created_at: new Date()
+        sender: displayName,
+        text: text,
+        timestamp: new Date(),
+        is_anonymous: isAnonymous
       };
 
       if (pool) {
         const [result] = await pool.execute(
           'INSERT INTO messages (group_id, user_name, is_anon, message, created_at) VALUES (?, ?, ?, ?, NOW())',
-          [groupId, displayName, isAnon ? 1 : 0, message]
+          [groupId, displayName, isAnonymous ? 1 : 0, text]
         );
         msg.id = result.insertId;
       } else {
-        // store in memory
         const arr = inMemoryMessages.get(groupId) || [];
         arr.push(msg);
         inMemoryMessages.set(groupId, arr);
       }
 
-      io.to(groupId).emit('message', msg);
+      // FIXED: Emit 'newMessage' with correct structure
+      io.to(groupId).emit('newMessage', msg);
     } catch (err) {
-      console.error('Failed to persist message', err);
-      socket.emit('error_message', { error: 'Failed to save message' });
+      console.error('❌ Failed to persist message:', err);
+      socket.emit('error', { message: 'Failed to save message' });
     }
+  });
+
+  // FIXED: Listen for 'typing' with correct parameters
+  socket.on('typing', ({ groupId, username, isTyping }) => {
+    socket.to(groupId).emit('userTyping', { username, isTyping });
   });
 
   socket.on('disconnect', () => {
     const p = presence.get(socket.id);
     if (p) {
       presence.delete(socket.id);
-      io.to(p.groupId).emit('presence', getPresenceForGroup(p.groupId));
-      socket.to(p.groupId).emit('system_message', { message: `${p.userName} left the group.` });
+      io.to(p.groupId).emit('onlineUsers', getOnlineUsersForGroup(p.groupId));
+      socket.to(p.groupId).emit('userLeft', { username: p.username });
+      console.log(`👋 ${p.username} disconnected`);
     }
-    console.log('socket disconnected', socket.id);
   });
 });
 
-function getPresenceForGroup(groupId) {
+// FIXED: Return simple array of usernames
+function getOnlineUsersForGroup(groupId) {
   const users = [];
   for (const [sid, info] of presence.entries()) {
     if (info.groupId === groupId) {
-      users.push({ userName: info.isAnon ? 'Anonymous' : info.userName, isAnon: !!info.isAnon });
+      users.push(info.isAnon ? 'Anonymous' : info.username);
     }
   }
   return users;
 }
 
 httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📡 Socket.IO ready for connections`);
 });
