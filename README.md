@@ -1,6 +1,8 @@
 # Fun Friday Group Chat
 
 Real-time group chat application with anonymous mode, built with Node.js, Socket.io and MySQL.
+<img width="461" height="837" alt="Screenshot 2025-09-29 172212" src="https://github.com/user-attachments/assets/f7f0ace9-015c-4874-8f6f-6ab13df10556" />
+
 
 Prerequisites
 - Node.js v14+
@@ -37,3 +39,4 @@ Notes
 Troubleshooting
 - If you see `ECONNREFUSED` when running `setup-db`, ensure MySQL is running and your `.env` credentials are correct.
 - If `port 3000` is in use, change `PORT` in `.env`.
+
